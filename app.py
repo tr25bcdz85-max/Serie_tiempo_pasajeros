@@ -4,7 +4,6 @@ import numpy as np
 import plotly.express as px
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-from prophet import Prophet
 from datos import cargar_datos
 
 # Configuración de la página
@@ -15,10 +14,10 @@ st.set_page_config(
 )
 
 # Título y descripción sencilla
-st.title("✈️ Aplicación Avanzada de Pronóstico de Pasajeros")
+st.title("✈️ Aplicación Sencilla de Pronóstico de Pasajeros")
 st.markdown("""
-¡Bienvenido! Compara diferentes modelos matemáticos e inteligencia artificial (SARIMA, Suavizamiento Exponencial, 
-Regresión Lineal y Prophet) para pronosticar los pasajeros de avión del futuro.
+¡Bienvenido! Compara diferentes modelos estadísticos (Suavizamiento Exponencial, SARIMA y Regresión Lineal) 
+para pronosticar los pasajeros de avión del futuro.
 """)
 
 # Cargar datos
@@ -54,8 +53,8 @@ st.plotly_chart(fig_historial, use_container_width=True)
 
 st.markdown("---")
 
-# Sección de Pronóstico con Múltiples Modelos
-st.subheader("🔮 Pronóstico con Múltiples Modelos")
+# Sección de Pronóstico con Modelos
+st.subheader("🔮 Pronóstico con Modelos Estadísticos")
 st.markdown("Elige el modelo que quieras utilizar y cuántos meses en el futuro deseas pronosticar.")
 
 col_config1, col_config2 = st.columns(2)
@@ -66,8 +65,7 @@ with col_config1:
         [
             "Suavizamiento Exponencial (Holt-Winters)",
             "SARIMA (Estacional Avanzado)",
-            "Regresión Lineal (Tendencia Simple)",
-            "Prophet (Modelo de Facebook)"
+            "Regresión Lineal (Tendencia Simple)"
         ]
     )
 
@@ -111,7 +109,6 @@ if st.button("🚀 Calcular Pronóstico", type="primary"):
             pronostico_valores = modelo.forecast(steps=meses_a_pronosticar)
             
         elif modelo_elegido == "Regresión Lineal (Tendencia Simple)":
-            # Regresión lineal usando NumPy directamente (sin sklearn)
             x = np.arange(len(df))
             y = df["Passengers"].values
             m, b = np.polyfit(x, y, 1)
@@ -119,17 +116,6 @@ if st.button("🚀 Calcular Pronóstico", type="primary"):
             tiempo_futuro = np.arange(len(df), len(df) + meses_a_pronosticar)
             predicciones_lr = m * tiempo_futuro + b
             pronostico_valores = pd.Series(predicciones_lr, index=fechas_futuras)
-            
-        elif modelo_elegido == "Prophet (Modelo de Facebook)":
-            df_prophet = df.rename(columns={"Month": "ds", "Passengers": "y"})
-            m_prophet = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
-            m_prophet.fit(df_prophet)
-            
-            futuro = m_prophet.make_future_dataframe(periods=meses_a_pronosticar, freq='MS')
-            forecast = m_prophet.predict(futuro)
-            
-            pronostico_valores = forecast.tail(meses_a_pronosticar)["yhat"].values
-            pronostico_valores = pd.Series(pronostico_valores, index=fechas_futuras)
 
         # Crear DataFrames para graficar
         df_pronostico = pd.DataFrame({
@@ -166,4 +152,4 @@ if st.button("🚀 Calcular Pronóstico", type="primary"):
         st.error(f"Ocurrió un error al calcular el pronóstico con este modelo: {e}")
 
 st.markdown("---")
-st.markdown("*Aplicación ampliada con múltiples modelos de series de tiempo para principiantes y expertos.*")
+st.markdown("*Aplicación web interactiva para pronóstico de series de tiempo.*")
