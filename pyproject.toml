@@ -1,0 +1,22 @@
+[project]
+name = "proyecto-serie-de-tiempo"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "tr25bcdz85-max", email = "oscar_villafuerte@hotmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=3.1.1",
+    "plotly>=7.1.0",
+    "requests>=2.34.2",
+    "statsmodels>=0.15.0",
+    "streamlit>=1.67.0",
+]
+
+[project.scripts]
+proyecto-serie-de-tiempo = "proyecto_serie_de_tiempo:main"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
