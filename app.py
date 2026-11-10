@@ -4,7 +4,6 @@ import numpy as np
 import plotly.express as px
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-from sklearn.linear_model import LinearRegression
 from prophet import Prophet
 from datos import cargar_datos
 
@@ -102,7 +101,6 @@ if st.button("🚀 Calcular Pronóstico", type="primary"):
             pronostico_valores = modelo.forecast(meses_a_pronosticar)
             
         elif modelo_elegido == "SARIMA (Estacional Avanzado)":
-            # Modelo SARIMA(1,1,1)(1,1,1,12) clásico para estacionalidad mensual
             modelo = SARIMAX(
                 df_modelo,
                 order=(1, 1, 1),
@@ -113,29 +111,23 @@ if st.button("🚀 Calcular Pronóstico", type="primary"):
             pronostico_valores = modelo.forecast(steps=meses_a_pronosticar)
             
         elif modelo_elegido == "Regresión Lineal (Tendencia Simple)":
-            # Crear una variable numérica de tiempo
-            df_reg = df.copy()
-            df_reg["Tiempo"] = np.arange(len(df_reg))
+            # Regresión lineal usando NumPy directamente (sin sklearn)
+            x = np.arange(len(df))
+            y = df["Passengers"].values
+            m, b = np.polyfit(x, y, 1)
             
-            X = df_reg[["Tiempo"]]
-            y = df_reg["Passengers"]
-            
-            lr = LinearRegression()
-            lr.fit(X, y)
-            
-            tiempo_futuro = np.arange(len(df_reg), len(df_reg) + meses_a_pronosticar).reshape(-1, 1)
-            predicciones_lr = lr.predict(tiempo_futuro)
+            tiempo_futuro = np.arange(len(df), len(df) + meses_a_pronosticar)
+            predicciones_lr = m * tiempo_futuro + b
             pronostico_valores = pd.Series(predicciones_lr, index=fechas_futuras)
             
         elif modelo_elegido == "Prophet (Modelo de Facebook)":
             df_prophet = df.rename(columns={"Month": "ds", "Passengers": "y"})
-            m = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
-            m.fit(df_prophet)
+            m_prophet = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
+            m_prophet.fit(df_prophet)
             
-            futuro = m.make_future_dataframe(periods=meses_a_pronosticar, freq='MS')
-            forecast = m.predict(futuro)
+            futuro = m_prophet.make_future_dataframe(periods=meses_a_pronosticar, freq='MS')
+            forecast = m_prophet.predict(futuro)
             
-            # Tomar solo los valores futuros
             pronostico_valores = forecast.tail(meses_a_pronosticar)["yhat"].values
             pronostico_valores = pd.Series(pronostico_valores, index=fechas_futuras)
 
